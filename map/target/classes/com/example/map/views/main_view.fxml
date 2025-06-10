@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.web.WebView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            xmlns="http://javafx.com/javafx"
+            fx:controller="com.example.map.controllers.MapController"
+            prefWidth="800" prefHeight="600">
+
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <children>
+
+        <!-- Page title -->
+        <Label layoutX="200" layoutY="10"
+               text="Explore Lesotho Tour Guide"
+               style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+
+        <!-- WebView for the interactive Leaflet map -->
+        <WebView fx:id="mapView"
+                 layoutX="50" layoutY="50"
+                 AnchorPane.topAnchor="50"
+                 AnchorPane.leftAnchor="50"
+                 AnchorPane.rightAnchor="50"
+                 AnchorPane.bottomAnchor="100" />
+
+        <!-- Start Tour Button -->
+        <Button text="Start Tour"
+                layoutX="350" layoutY="550"
+                AnchorPane.bottomAnchor="20"
+                AnchorPane.leftAnchor="350"
+                onAction="#onStartTourClicked" />
+
+    </children>
+</AnchorPane>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Lesotho Tour Guide Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          overflow: hidden;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #map {
+          width: 100vw;
+          height: 100vh;
+        }
+
+        .btn-group {
+          position: absolute;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          z-index: 1001;
+          justify-content: center;
+        }
+
+        .btn-group button,
+        #quiz button {
+          padding: 10px 15px;
+          font-size: 16px;
+          border-radius: 8px;
+          border: none;
+          background-color: #4a90e2;
+          color: white;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+          transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-group button:hover,
+        #quiz button:hover {
+          background-color: #357ABD;
+          transform: scale(1.05);
+        }
+
+        .section-box {
+          position: absolute;
+          top: 60px;
+          right: 20px;
+          width: 340px;
+          max-height: 80vh;
+          overflow-y: auto;
+          background-color: #fff;
+          border: 1px solid #ccc;
+          border-radius: 10px;
+          padding: 20px;
+          z-index: 1000;
+          box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+          display: none;
+        }
+
+        .section-box.active {
+          display: block;
+        }
+
+        #media img,
+        #media audio,
+        #media video {
+          max-width: 100%;
+          margin-bottom: 10px;
+          border-radius: 6px;
+        }
+
+        #quizFeedback {
+          margin-top: 10px;
+          font-weight: bold;
+        }
+
+        .exit-btn {
+          position: absolute;
+          top: 15px;
+          right: 20px;
+          background-color: transparent;
+          border: none;
+          cursor: pointer;
+          z-index: 1002;
+        }
+
+        .exit-btn img {
+          width: 32px;
+          height: 32px;
+          transition: transform 0.3s ease;
+        }
+
+        .exit-btn:hover img {
+          transform: scale(1.2);
+        }
+
+        @media (max-width: 600px) {
+          .section-box {
+            width: 90%;
+            right: 5%;
+            top: 80px;
+            padding: 15px;
+          }
+
+          .btn-group {
+            flex-direction: column;
+            bottom: 10px;
+          }
+
+          .btn-group button {
+            font-size: 14px;
+            padding: 8px 10px;
+            width: 100%;
+          }
+
+          .exit-btn img {
+            width: 28px;
+            height: 28px;
+          }
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Exit Button -->
+<button class="exit-btn" id="closeBtn" onclick="closeSections()" style="display: none;">
+    <img src="https://cdn-icons-png.flaticon.com/512/463/463612.png" alt="Exit" />
+</button>
+
+<!-- Bottom Buttons -->
+<div class="btn-group">
+    <button onclick="toggleSection('info')">Info</button>
+    <button onclick="toggleSection('media')">Media</button>
+    <button onclick="toggleSection('quiz')">Quiz</button>
+    <button onclick="openStreetView()">Street View</button>
+</div>
+
+<!-- Info Section -->
+<section id="info" class="section-box">
+    <h3>Info</h3>
+    <p>Welcome to Lesotho! Explore beautiful landmarks and learn about our culture.</p>
+</section>
+
+<!-- Media Section -->
+<section id="media" class="section-box">
+    <h3>Media</h3>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/9/94/Thaba_Bosiu.jpg" alt="Thaba Bosiu">
+    <audio controls>
+        <source src="assets/audio/thaba.mp3" type="audio/mpeg" />
+    </audio>
+    <video controls>
+        <source src="C:\Users\MAPHUTSENG\Desktop\map\src\main\resources\assets\video\thaba.mp4" type="video/mp4" />
+    </video>
+</section>
+
+<!-- Quiz Section -->
+<section id="quiz" class="section-box">
+    <h3>Quiz</h3>
+    <p id="questionText"></p>
+    <form id="quizForm"></form>
+    <button id="submitBtn" type="button">Submit Answer</button>
+    <p id="quizFeedback"></p>
+</section>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    const map = L.map('map').setView([-29.61, 28.24], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let selectedLatLng = null;
+
+    const landmarks = [
+      { name: "Thaba Bosiu", lat: -29.51, lng: 27.89 },
+      { name: "Katse Dam", lat: -29.28, lng: 28.48 },
+      { name: "Maletsunyane Falls", lat: -29.83, lng: 28.13 }
+    ];
+
+    landmarks.forEach(place => {
+      const marker = L.marker([place.lat, place.lng]).addTo(map)
+        .bindPopup(place.name)
+        .on('click', function () {
+          selectedLatLng = this.getLatLng();
+        });
+    });
+
+    function openStreetView() {
+      if (!selectedLatLng) {
+        alert("Please click on a landmark marker first to view Street View.");
+        return;
+      }
+      const { lat, lng } = selectedLatLng;
+      const url = `https://www.google.com/maps?q=&layer=c&cbll=${lat},${lng}`;
+      window.open(url, "_blank");
+    }
+
+    function toggleSection(id) {
+      document.querySelectorAll('.section-box').forEach(sec => {
+        if (sec.id === id) {
+          sec.classList.toggle('active');
+        } else {
+          sec.classList.remove('active');
+        }
+      });
+
+      const anyOpen = document.querySelector('.section-box.active');
+      document.getElementById('closeBtn').style.display = anyOpen ? 'block' : 'none';
+    }
+
+    function closeSections() {
+      document.querySelectorAll('.section-box').forEach(sec => sec.classList.remove('active'));
+      document.getElementById('closeBtn').style.display = 'none';
+    }
+
+    const quizQuestions = [
+      { question: "Where is Thaba Bosiu located?", options: { maseru: "Maseru District", quthing: "Quthing District"}, correct: "maseru" },
+      { question: "What is the capital of Lesotho?", options: { maseru: "Maseru", mafeteng: "Mafeteng" }, correct: "maseru" },
+      { question: "Which mountain range covers much of Lesotho?", options: { drakensberg: "Drakensberg", atlas: "Atlas" }, correct: "drakensberg" },
+      { question: "Currency of Lesotho?", options: { loti: "Loti", rand: "Rand" }, correct: "loti" },
+      { question: "Surrounding country?", options: { southAfrica: "South Africa", botswana: "Botswana" }, correct: "southAfrica" },
+      { question: "Traditional Basotho hat?", options: { mokorotlo: "Mokorotlo", kufi: "Kufi" }, correct: "mokorotlo" },
+      { question: "Main language?", options: { sesotho: "Sesotho", zulu: "Zulu" }, correct: "sesotho" },
+      { question: "District with scenic views?", options: { mokhotlong: "Mokhotlong", berea: "Berea" }, correct: "mokhotlong" },
+      { question: "Government type?", options: { constitutionalMonarchy: "Constitutional Monarchy", republic: "Republic" }, correct: "constitutionalMonarchy" },
+      { question: "Independence year?", options: { 1966: "1966", 1975: "1975" }, correct: "1966" },
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const questionText = document.getElementById('questionText');
+    const quizForm = document.getElementById('quizForm');
+    const quizFeedback = document.getElementById('quizFeedback');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showQuestion(index) {
+      const q = quizQuestions[index];
+      questionText.textContent = q.question;
+      quizForm.innerHTML = '';
+      quizFeedback.textContent = '';
+
+      for (const key in q.options) {
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="radio" name="answer" value="${key}"> ${q.options[key]}<br>`;
+        quizForm.appendChild(label);
+      }
+    }
+
+    submitBtn.addEventListener('click', () => {
+      const selected = document.querySelector('input[name="answer"]:checked');
+      if (!selected) {
+        quizFeedback.style.color = 'orange';
+        quizFeedback.textContent = "Please choose an answer!";
+        return;
+      }
+
+      const correct = quizQuestions[currentQuestionIndex].correct;
+      if (selected.value === correct) {
+        score++;
+        quizFeedback.style.color = 'green';
+        quizFeedback.textContent = "✅ Correct!";
+      } else {
+        quizFeedback.style.color = 'red';
+        quizFeedback.textContent = `❌ Incorrect. Correct answer is: ${quizQuestions[currentQuestionIndex].options[correct]}`;
+      }
+
+      submitBtn.disabled = true;
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizQuestions.length) {
+          showQuestion(currentQuestionIndex);
+          submitBtn.disabled = false;
+        } else {
+          quizForm.innerHTML = '';
+          questionText.textContent = `🎉 You scored ${score} out of ${quizQuestions.length}!`;
+          submitBtn.style.display = 'none';
+
+          const restartBtn = document.createElement('button');
+          restartBtn.textContent = 'Restart Quiz';
+          restartBtn.onclick = () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            submitBtn.style.display = 'inline-block';
+            quizForm.innerHTML = '';
+            quizFeedback.textContent = '';
+            restartBtn.remove();
+            submitBtn.disabled = false;
+            showQuestion(currentQuestionIndex);
+          };
+          quizForm.appendChild(restartBtn);
+        }
+      }, 1500);
+    });
+
+    showQuestion(currentQuestionIndex);
+</script>
+</body>
+</html>

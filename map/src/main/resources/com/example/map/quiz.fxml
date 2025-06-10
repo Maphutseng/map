@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.map.controllers.QuizController"
+      spacing="10" padding="10">
+
+    <Label fx:id="questionLabel" wrapText="true" />
+    <RadioButton fx:id="option1" toggleGroup="$options" />
+    <RadioButton fx:id="option2" toggleGroup="$options" />
+    <RadioButton fx:id="option3" toggleGroup="$options" />
+
+    <Button text="Submit" onAction="#checkAnswer"/>
+    <Label fx:id="feedbackLabel" />
+</VBox>

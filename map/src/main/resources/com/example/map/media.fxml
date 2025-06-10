@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.media.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.map.controllers.MediaController"
+      spacing="10" padding="10">
+
+    <Label text="Lesotho Culture - Audio/Video Tour" style="-fx-font-size: 16px;"/>
+    <MediaView fx:id="mediaView" fitWidth="600" fitHeight="300"/>
+
+    <HBox spacing="10">
+        <Button text="Play Audio" onAction="#playAudio"/>
+        <Button text="Play Video" onAction="#playVideo"/>
+        <Button text="Stop" onAction="#stopMedia"/>
+    </HBox>
+</VBox>
